@@ -1,0 +1,11 @@
+# GitLab user. git by default
+user: <%= node['gitlab']['user'] %>
+
+# Url to gitlab instance. Used for api calls
+gitlab_url: <%= node['gitlab']['url'] %>
+
+# Repositories path
+repos_path: <%= node['gitlab']['repos_path'] %>
+
+# File used as authorized_keys for gitlab user
+auth_file: <%= File.join(node['gitlab']['home'], ".ssh", "authorized_keys") %>

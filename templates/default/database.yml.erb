@@ -1,0 +1,13 @@
+#
+# PRODUCTION
+#
+production:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  database: gitlabhq_production
+  pool: 5
+  username: gitlab
+  password: <%= node['gitlab']['mysql_password'] %>
+  socket: <%= node['mysql']['socket'] %>
+  # host: localhost
