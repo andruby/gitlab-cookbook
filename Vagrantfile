@@ -6,6 +6,8 @@ Vagrant.configure("2") do |config|
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
 
+  config.berkshelf.enabled = true
+
   config.vm.hostname = "gitlab-berkshelf"
 
   # Standard Ubuntu 12.04.2 base box
