@@ -117,7 +117,7 @@ execute "clone gitlab" do
   not_if { ::File.exists?(node['gitlab']['path']) }
 end
 
-%w{gitlab.yml unicorn.rb database.yml resque.yml}.each do |conf_file|
+%w{gitlab.yml puma.rb database.yml resque.yml}.each do |conf_file|
   template File.join(node['gitlab']['path'], 'config', conf_file) do
     user node['gitlab']['user']
     source "#{conf_file}.erb"
