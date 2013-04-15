@@ -67,38 +67,13 @@ user node['gitlab']['user'] do
   action :lock
 end
 
-# Gitlab Shell
-execute "clone gitlab shell" do
-  command "git clone https://github.com/gitlabhq/gitlab-shell.git #{node['gitlab']['shell_path']}"
-  cwd node['gitlab']['home']
-  user node['gitlab']['user']
-  not_if { ::File.exists?(node['gitlab']['shell_path']) }
-end
-
-template "gitlab-shell/config.yml" do
-  path File.join(node['gitlab']['shell_path'], 'config.yml')
-  user node['gitlab']['user']
-  source "gitlab_shell_config.yml.erb"
-end
-
-execute "gitlab install" do
-  command "./bin/install"
-  cwd node['gitlab']['shell_path']
-  user node['gitlab']['user']
-  not_if { ::File.exists?(node['gitlab']['repos_path']) }
-end
+include_recipe "gitlab::nginx"
+include_recipe "gitlab::gitlab_shell"
 
 # Database
 mysql_connection_info = {:host => "localhost",
                          :username => 'root',
                          :password => node['mysql']['server_root_password']}
-
-# TODO: Link with notify to execute rake db:setup db:seed_fu tasks
-mysql_database 'gitlabhq_production' do
-  connection mysql_connection_info
-  encoding 'utf8'
-  collation 'utf8_unicode_ci'
-end
 
 mysql_database_user 'gitlab' do
   connection mysql_connection_info
@@ -106,7 +81,7 @@ mysql_database_user 'gitlab' do
   database_name 'gitlabhq_production'
   host 'localhost'
   privileges [:select, :update, :insert, :delete, :create, :drop, :index, :alter]
-  action [:create, :grant]
+  action :create
 end
 
 # GitLab
@@ -145,40 +120,42 @@ execute 'bundle install' do
   cwd node['gitlab']['path']
 end
 
-# TODO: Make idempotent or every chef run will reset the database!
-execute "rake db:setup db:seed_fu" do
-  command "bundle exec rake db:setup db:seed_fu RAILS_ENV=production"
+execute "seed_database" do
+  command "bundle exec rake RAILS_ENV=production db:setup db:seed_fu"
   user node['gitlab']['user']
   cwd node['gitlab']['path']
-  only_if { }
+  action :nothing
+end
+
+# Create the database and notify grant and seed
+mysql_database 'gitlabhq_production' do
+  connection mysql_connection_info
+  encoding 'utf8'
+  collation 'utf8_unicode_ci'
+  action :create
+  notifies :grant, "mysql_database_user[gitlab]", :immediately
+  notifies :run, "execute[seed_database]", :immediately
+end
+
+service "gitlab" do
+  supports :restart => true, :start => true, :stop => true, :status => true
+  action :nothing
 end
 
 template "/etc/init.d/gitlab" do
   source "init_gitlab.erb"
   mode 0700
-end
-
-service "gitlab" do
-  action [:enable, :start]
-end
-
-# Nginx
-
-include_recipe "nginx"
-
-execute "nxdissite default" do
-  only_if { Dir['/etc/nginx/sites-enabled/*default'].count > 0 }
+  notifies :enable, "service[gitlab]"
+  notifies :start, "service[gitlab]"
 end
 
 template "/etc/nginx/sites-available/gitlab" do
   source "nginx_gitlab.erb"
   mode 0644
+  notifies :restart, "service[nginx]"
 end
 
 execute "nxensite gitlab" do
   only_if { Dir['/etc/nginx/sites-enabled/gitlab'].count == 0 }
-end
-
-service "nginx" do
-  action :restart
+  notifies :restart, "service[nginx]"
 end
