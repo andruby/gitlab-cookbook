@@ -121,7 +121,28 @@ execute 'bundle install' do
 end
 
 execute "seed_database" do
-  command "bundle exec rake RAILS_ENV=production db:setup db:seed_fu"
+  command "bundle exec rake RAILS_ENV=production db:setup"
+  user node['gitlab']['user']
+  cwd node['gitlab']['path']
+  action :nothing
+  notifies :run, "execute[create_admin]", :immediately
+end
+
+# Manually add the first administrator
+# script contents from https://github.com/gitlabhq/gitlabhq/blob/master/db/fixtures/production/001_admin.rb
+execute "create_admin" do
+  ruby_script = <<EOS
+  admin = User.create!(
+    email: '#{node['gitlab']['root']['email']}',
+    name: '#{node['gitlab']['root']['name']}',
+    username: '#{node['gitlab']['root']['username']}',
+    password: '#{node['gitlab']['root']['password']}',
+    password_confirmation: '#{node['gitlab']['root']['password']}')
+  admin.projects_limit = 10000
+  admin.admin = true
+  admin.save!
+EOS
+  command "bundle exec rails runner -e production \"#{ruby_script}\""
   user node['gitlab']['user']
   cwd node['gitlab']['path']
   action :nothing
