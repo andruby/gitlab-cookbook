@@ -15,7 +15,7 @@ production: &base
   ## GitLab settings
   gitlab:
     ## Web server settings
-    host: <%= node['gitlab']['host'] %>
+    host: "<%= node['gitlab']['host'] %>"
     port: 80
     https: false
     # Uncomment and customize to run in non-root path
@@ -27,10 +27,10 @@ production: &base
 
     ## Email settings
     # Email address used in the "From" field in mails sent by GitLab
-    email_from: <%= node['gitlab']['email_from'] %>
+    email_from: "<%= node['gitlab']['email_from'] %>"
 
     # Email address of your support contact (default: same as email_from)
-    support_email: <%= node['gitlab']['support_email'] %>
+    support_email: "<%= node['gitlab']['support_email'] %>"
 
     ## Project settings
     default_projects_limit: 10
@@ -112,7 +112,7 @@ production: &base
   # GitLab Satellites
   satellites:
     # Relative paths are relative to Rails.root (default: tmp/repo_satellites/)
-    path: <%= node['gitlab']['satellites_path'] %>
+    path: "<%= node['gitlab']['satellites_path'] %>"
 
   ## Backup settings
   backup:
@@ -122,8 +122,8 @@ production: &base
   ## GitLab Shell settings
   gitlab_shell:
     # REPOS_PATH MUST NOT BE A SYMLINK!!!
-    repos_path: <%= node['gitlab']['repos_path'] %>
-    hooks_path: <%= File.join(node['gitlab']['shell_path'], 'hooks/') %>
+    repos_path: "<%= node['gitlab']['repos_path'] %>"
+    hooks_path: "<%= File.join(node['gitlab']['shell_path'], 'hooks/') %>"
 
     # Git over HTTP
     upload_pack: true
