@@ -81,7 +81,7 @@ Vagrant.configure("2") do |config|
     }
 
     chef.run_list = [
-      "recipe[gitlab::default]"
+      "recipe[gitlab::default]", "recipe[gitlab::fanout]"
     ]
   end
 end

@@ -6,11 +6,19 @@ Chef cookbook to setup gitlab v5.x according to the instructions on https://gith
 
 # Usage
 
-Test with `vagrant up` and you should be able to login on http://33.33.33.10/ with user `root` and password `5iveL!fe`.
-
 # Attributes
 
+See the `attributes/default.rb` file
+
 # Recipes
+
+## Default
+
+Default recipe
+
+## Fanout
+
+Optional recipe that installs https://github.com/travisghansen/fanout and enables it as an Upstart service.
 
 # Author
 

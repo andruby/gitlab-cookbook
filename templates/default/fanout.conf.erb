@@ -1,0 +1,15 @@
+# fanout - A simple fanout pubsub message server
+#
+# From https://github.com/travisghansen/fanout
+# Used in conjucture with SparkleShare
+
+description   "A simple fanout pubsub message server"
+author        "Andrew Fecheyr <andrew@bedesign.be>"
+
+start on runlevel [2345]
+stop on runlevel [016]
+
+respawn
+respawn limit 2 5
+
+exec <%= node['fanout']['bin'] %> <%= @options %>
