@@ -4,7 +4,7 @@ Chef cookbook to setup gitlab v5.x according to [these instructions](https://git
 
 # Requirements
 
-To develop and test this cookbook, we recommend installing [Vagrant](http://www.vagrantup.com/) and [berkshelf-vagrant](https://github.com/RiotGames/berkshelf-vagrant).
+To develop and test this cookbook, we recommend installing [Vagrant](http://www.vagrantup.com/) and [vagrant-berkshelf](https://github.com/RiotGames/vagrant-berkshelf).
 
 # Usage
 
