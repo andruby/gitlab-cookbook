@@ -20,6 +20,11 @@ default['gitlab']['root']['name'] = 'Administrator'
 default['gitlab']['root']['username'] = 'root'
 default['gitlab']['root']['password'] = '5iveL!fe'
 
+# SSL configuration
+default['gitlab']['ssl'] = false
+default['gitlab']['ssl_crt_path'] = ''
+default['gitlab']['ssl_key_path'] = ''
+
 # Fanout
 default['fanout']['dir'] = '/opt/fanout'
 default['fanout']['bin'] = '/usr/local/bin/fanout'

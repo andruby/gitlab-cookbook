@@ -21,6 +21,12 @@ server {
     try_files $uri $uri/index.html $uri.html @gitlab;
   }
 
+  <%- if node['gitlab']['ssl'] %>
+  ssl on;
+  ssl_certificate <%= node['gitlab']['ssl_crt_path'] %>;
+  ssl_certificate_key <%= node['gitlab']['ssl_key_path'] %>;
+  <%- end %>
+
   # if a file, which is not found in the root folder is requested,
   # then the proxy pass the request to the upsteam (gitlab unicorn)
   location @gitlab {
