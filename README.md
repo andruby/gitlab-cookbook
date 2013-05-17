@@ -8,6 +8,8 @@ To develop and test this cookbook, we recommend installing [Vagrant](http://www.
 
 # Usage
 
+See the vagrantfile for minimum attributes needed.
+
 `vagrant up` and visit `http://localhost:8080` after it finishes.
 
 # Attributes

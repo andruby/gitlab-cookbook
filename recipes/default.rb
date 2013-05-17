@@ -15,19 +15,10 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
 
-# This Recipe tries to follow the installation instructions at https://github.com/gitlabhq/gitlabhq/blob/master/doc/install/installation.md
-# as closely as possible (v5.0 at time of writing).
+# This Recipe tries to follow the installation instructions at https://github.com/gitlabhq/gitlabhq/blob/master/doc/install/installation.md (v5.2 at time of writing).
 
-# Check if password is set
+# Check if mysql password is set
 if Chef::Config[:solo]
   missing_attrs = %w{mysql_password}.select do |attr|
     node["gitlab"][attr].nil?
@@ -42,7 +33,12 @@ else
   node.save
 end
 
-include_recipe "apt::default"
+case node["platform"]
+when "debian", "ubuntu"
+  include_recipe "apt::default"
+when "redhat", "centos", "fedora"
+  include_recipe "yum::epel"
+end
 
 # Include cookbook dependencies
 %w{ git build-essential readline xml zlib python::package python::pip
@@ -56,6 +52,7 @@ end
 
 gem_package "bundler"
 
+# Git user
 user node['gitlab']['user'] do
   comment   "GitLab"
   home      node['gitlab']['home']
@@ -84,14 +81,17 @@ mysql_database_user 'gitlab' do
   action :create
 end
 
-# GitLab
-execute "clone gitlab" do
-  command "git clone https://github.com/gitlabhq/gitlabhq.git #{node['gitlab']['path']}"
-  cwd node['gitlab']['home']
-  user node['gitlab']['user']
-  not_if { ::File.exists?(node['gitlab']['path']) }
+# Clone the Gitlab repository
+git "gitlab" do
+  repository    "https://github.com/gitlabhq/gitlabhq.git"
+  revision      node['gitlab']['revision']
+  destination   node['gitlab']['path']
+  user          node['gitlab']['user']
+  action        :sync
+  notifies      :run, "execute[migrations]", :delayed
 end
 
+# Write config files for gitlab, puma and resque
 %w{gitlab.yml puma.rb database.yml resque.yml}.each do |conf_file|
   template File.join(node['gitlab']['path'], 'config', conf_file) do
     user node['gitlab']['user']
@@ -99,19 +99,39 @@ end
   end
 end
 
-%w{log tmp tmp/pids}.each do |dir|
+# Make sure GitLab can write to the log/, tmp/ and public/uploads directories
+%w{log tmp tmp/pids tmp/sockets public/uploads}.each do |dir|
   directory File.join(node['gitlab']['path'], dir) do
-    user node['gitlab']['user']
+    owner node['gitlab']['user']
+    group node['gitlab']['group']
     mode 0744
   end
 end
 
+# Set ownership of repositories path
+directory(node['gitlab']['repos_path']) do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  recursive true
+  mode 2755
+end
+
+# Create directory for satellites
 directory node['gitlab']['satellites_path'] do
   user node['gitlab']['user']
 end
 
+# Configure Git global settings for git user, useful when editing via web
+# Edit user.email according to what is set in gitlab.yml
+bash "git config" do
+  code 'git config --global user.name "GitLab" && git config --global user.email "gitlab@localhost"'
+  user node['gitlab']['user']
+  environment('HOME' => node['gitlab']['home'])
+end
+
+# Install gems
 gem_package 'charlock_holmes' do
-  version '0.6.9'
+  version '0.6.9.4'
 end
 
 execute 'bundle install' do
@@ -120,12 +140,21 @@ execute 'bundle install' do
   cwd node['gitlab']['path']
 end
 
+# Seed the database
 execute "seed_database" do
   command "bundle exec rake RAILS_ENV=production db:setup"
   user node['gitlab']['user']
   cwd node['gitlab']['path']
   action :nothing
   notifies :run, "execute[create_admin]", :immediately
+end
+
+# Migrate the database on a git sync
+execute "migrations" do
+  command "bundle exec rake RAILS_ENV=production db:migrate"
+  user node['gitlab']['user']
+  cwd node['gitlab']['path']
+  action :nothing
 end
 
 # Manually add the first administrator
@@ -165,7 +194,7 @@ end
 
 template "/etc/init.d/gitlab" do
   source "init_gitlab.erb"
-  mode 0700
+  mode 0744
   notifies :enable, "service[gitlab]"
   notifies :start, "service[gitlab]"
 end
@@ -176,7 +205,4 @@ template "/etc/nginx/sites-available/gitlab" do
   notifies :restart, "service[nginx]"
 end
 
-execute "nxensite gitlab" do
-  only_if { Dir['/etc/nginx/sites-enabled/gitlab'].count == 0 }
-  notifies :restart, "service[nginx]"
-end
+nginx_site "gitlab"
