@@ -42,15 +42,70 @@ end
 
 # Include cookbook dependencies
 %w{ git build-essential readline xml zlib python::package python::pip
-    redisio::install redisio::enable mysql::server mysql::ruby nginx }.each do |requirement|
+redisio::install redisio::enable mysql::server mysql::ruby nginx }.each do |requirement|
   include_recipe requirement
 end
 
-%w{ ruby1.9.1 ruby1.9.1-dev curl libicu-dev }.each do |pkg|
-  package pkg
-end
+case node["platform"]
+when "debian", "ubuntu"
+  %w{ ruby1.9.1 ruby1.9.1-dev curl libicu-dev }.each do |pkg|
+    package pkg
+  end
+when "redhat", "centos", "fedora"
+  %w{redis libicu-devel patch gcc-c++ readline-devel zlib-devel libffi-devel openssl-devel make autoconf automake libtool bison libxml2-devel libxslt-devel libyaml-devel}.each do |pkg|
+    package pkg
+  end
 
-gem_package "bundler"
+  # Remove old ruby versions!
+  bash "Remove old ruby versions" do
+    code <<-EOH
+    yum remove ruby -y
+    EOH
+    not_if "ruby --version | grep 1.9"
+  end
+
+  # Install ruby manually via RVM
+  directory "/tmp/ruby" do
+    owner "root"
+    group "root"
+    mode 00755
+    action :create
+  end
+
+  bash "Install RVM" do
+    user "root"
+    cwd "/tmp/ruby"
+    code <<-EOH
+    ## Install rvm
+    curl -L get.rvm.io | bash -s stable
+    EOH
+    not_if "test -f /etc/profile.d/rvm.sh"
+  end
+
+  bash "Install ruby 1.9.3" do
+    user "root"
+    cwd "/tmp/ruby"
+    code <<-EOH
+    ## Load RVM
+    source /etc/profile.d/rvm.sh
+    rvm pkg install libyaml
+
+    command rvm install 1.9.3 --with-libyaml-dir=/usr/local/rvm/usr
+    rvm use 1.9.3
+
+    EOH
+    not_if "ruby --version | grep 1.9.3"
+  end
+
+  bash "Source rvm" do
+    user "root"
+    cwd "/tmp"
+    code <<-EOH
+    source /etc/profile.d/rvm.sh
+    EOH
+  end
+
+end
 
 # Git user
 user node['gitlab']['user'] do
@@ -69,8 +124,8 @@ include_recipe "gitlab::gitlab_shell"
 
 # Database
 mysql_connection_info = {:host => "localhost",
-                         :username => 'root',
-                         :password => node['mysql']['server_root_password']}
+  :username => 'root',
+:password => node['mysql']['server_root_password']}
 
 mysql_database_user 'gitlab' do
   connection mysql_connection_info
@@ -129,9 +184,28 @@ bash "git config" do
   environment('HOME' => node['gitlab']['home'])
 end
 
-# Install gems
-gem_package 'charlock_holmes' do
-  version '0.6.9.4'
+if platform?("ubuntu")
+  # Install gems
+  gem_package "bundler"
+  gem_package 'charlock_holmes' do
+    version '0.6.9.4'
+  end
+else
+
+  bash "Install charlock_holmes gem" do
+    code <<-EOH
+    gem install charlock_holmes --version '0.6.9.4'
+    EOH
+    not_if "gem list | grep charlock_holmes"
+  end
+
+  bash "Install bundler gem" do
+    code <<-EOH
+    gem install bundler
+    EOH
+    not_if "gem list | grep bundler"
+  end
+
 end
 
 execute 'bundle install' do
@@ -160,7 +234,7 @@ end
 # Manually add the first administrator
 # script contents from https://github.com/gitlabhq/gitlabhq/blob/master/db/fixtures/production/001_admin.rb
 execute "create_admin" do
-  ruby_script = <<EOS
+  ruby_script = <<-EOS
   admin = User.create!(
     email: '#{node['gitlab']['root']['email']}',
     name: '#{node['gitlab']['root']['name']}',

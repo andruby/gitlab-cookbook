@@ -14,6 +14,12 @@
 # Description:       GitLab git repository management
 ### END INIT INFO
 
+<%- if platform?("centos") %>
+# Include RedHat function library
+. /etc/rc.d/init.d/functions
+source /etc/profile.d/rvm.sh
+rvm use 1.9.3
+<%- end %>
 
 APP_ROOT="<%= node['gitlab']['path'] %>"
 DAEMON_OPTS="-C $APP_ROOT/config/puma.rb -e production"
