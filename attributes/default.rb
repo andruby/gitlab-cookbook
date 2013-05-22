@@ -7,6 +7,7 @@ default['gitlab']['path'] = "/home/git/gitlab"
 default['gitlab']['satellites_path'] = "/home/git/gitlab-satellites"
 default['gitlab']['revision'] = 'v5.2.0'
 default['gitlab']['shell_revision'] = 'v1.4.0'
+default['gitlab']['port'] = '80'
 
 # Url to gitlab instance. Used for api calls
 default['gitlab']['url'] = "http://localhost/"
