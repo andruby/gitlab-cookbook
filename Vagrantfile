@@ -14,8 +14,23 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "gitlab-berkshelf"
 
   # Standard Ubuntu 12.04.2 base box
-  config.vm.box = "ubuntu-12.04.2-amd64"
-  config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
+  #config.vm.box = "ubuntu-12.04.2-amd64"
+  #config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
+
+  config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130427.box"
+  config.vm.box = "nrel-centos6"
+  
+  # Assign this VM to a host-only network IP, allowing you to access it
+  # via the IP. Host-only networks can talk to the host machine as well as
+  # any other machines on the same network, but cannot be accessed (through this
+  # network interface) by any external networks.
+  config.vm.network :private_network, ip: "33.33.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+
+  # config.vm.network :public_network
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
