@@ -5,7 +5,7 @@ default['gitlab']['shell_path'] = "/home/git/gitlab-shell"
 default['gitlab']['repos_path'] = "/home/git/repositories"
 default['gitlab']['path'] = "/home/git/gitlab"
 default['gitlab']['satellites_path'] = "/home/git/gitlab-satellites"
-default['gitlab']['revision'] = '22d411e5579a9fcde24ae0f58a660da4f35652da' # 5.2.0.rc1
+default['gitlab']['revision'] = 'v5.2.0'
 default['gitlab']['shell_revision'] = 'v1.4.0'
 
 # Url to gitlab instance. Used for api calls
