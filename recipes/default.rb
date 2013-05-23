@@ -75,7 +75,7 @@ mysql_connection_info = {:host => "localhost",
 mysql_database_user 'gitlab' do
   connection mysql_connection_info
   password node['gitlab']['mysql_password']
-  database_name 'gitlabhq_production'
+  database_name node['gitlab']['database_name']
   host 'localhost'
   privileges [:select, :update, :insert, :delete, :create, :drop, :index, :alter]
   action :create
@@ -178,7 +178,7 @@ EOS
 end
 
 # Create the database and notify grant and seed
-mysql_database 'gitlabhq_production' do
+mysql_database(node['gitlab']['database_name']) do
   connection mysql_connection_info
   encoding 'utf8'
   collation 'utf8_unicode_ci'
