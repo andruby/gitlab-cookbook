@@ -14,11 +14,14 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "gitlab-berkshelf"
 
   # Standard Ubuntu 12.04.2 base box
-  #config.vm.box = "ubuntu-12.04.2-amd64"
-  #config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
+  config.vm.box = "ubuntu-12.04.2-amd64"
+  config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
 
-  config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130427.box"
-  config.vm.box = "nrel-centos6"
+  # CentOS 6.4 Box
+  #config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130427.box"
+  #config.vm.box = "nrel-centos6"
+
+
   config.vm.provider "virtualbox" do |v|
      v.customize ["modifyvm", :id, "--memory", 2048]
   end
