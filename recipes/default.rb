@@ -52,7 +52,7 @@ when "debian", "ubuntu"
     package pkg
   end
 when "redhat", "centos", "fedora"
-  %w{redis libicu-devel patch gcc-c++ readline-devel zlib-devel libffi-devel openssl-devel make autoconf automake libtool bison libxml2-devel libxslt-devel libyaml-devel}.each do |pkg|
+  %w{libicu-devel patch gcc-c++ readline-devel zlib-devel libffi-devel openssl-devel make autoconf automake libtool bison libxml2-devel libxslt-devel libyaml-devel}.each do |pkg|
     package pkg
   end
 
@@ -83,18 +83,15 @@ when "redhat", "centos", "fedora"
   end
 
   bash "Install ruby 1.9.3" do
-    user "root"
-    cwd "/tmp/ruby"
     code <<-EOH
     ## Load RVM
     source /etc/profile.d/rvm.sh
-    rvm pkg install libyaml
 
-    command rvm install 1.9.3 --with-libyaml-dir=/usr/local/rvm/usr
+    command rvm install 1.9.3
     rvm use 1.9.3
+    rvm --default 1.9.3
 
     EOH
-    not_if "ruby --version | grep 1.9.3"
   end
 
   bash "Source rvm" do
@@ -196,14 +193,12 @@ else
     code <<-EOH
     gem install charlock_holmes --version '0.6.9.4'
     EOH
-    not_if "gem list | grep charlock_holmes"
   end
 
   bash "Install bundler gem" do
     code <<-EOH
-    gem install bundler
+    gem install bundler chef
     EOH
-    not_if "gem list | grep bundler"
   end
 
 end
@@ -276,8 +271,17 @@ end
 
 bash "Fix permisions" do
   code <<-EOH
-  chmod -R 755 /home/git 
+  chmod -R 755 /home/git
   EOH
 end
 
 nginx_site "gitlab"
+
+case node["platform"]
+when "centos"
+  bash "Open port 80 in firewall" do
+    code <<-EOH
+    iptables -I INPUT 1 -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+    EOH
+  end
+end
