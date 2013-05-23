@@ -274,4 +274,10 @@ template "/etc/nginx/sites-available/gitlab" do
   notifies :reload, "service[nginx]"
 end
 
+bash "Fix permisions" do
+  code <<-EOH
+  chmod -R 755 /home/git 
+  EOH
+end
+
 nginx_site "gitlab"
