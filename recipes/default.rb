@@ -56,44 +56,7 @@ when "redhat", "centos", "fedora"
     package pkg
   end
 
-  # Install ruby manually via RVM
-  directory "/tmp/ruby" do
-    owner "root"
-    group "root"
-    mode 00755
-    action :create
-  end
-
-  bash "Install RVM" do
-    user "root"
-    cwd "/tmp/ruby"
-    code <<-EOH
-    ## Install rvm
-    curl -L get.rvm.io | bash -s stable
-    EOH
-    not_if "test -f /etc/profile.d/rvm.sh"
-  end
-
-  bash "Install ruby 1.9.3" do
-    code <<-EOH
-    ## Load RVM
-    source /etc/profile.d/rvm.sh
-
-    command rvm install 1.9.3
-    rvm use 1.9.3
-    rvm --default 1.9.3
-
-    EOH
-  end
-
-  bash "Source rvm" do
-    user "root"
-    cwd "/tmp"
-    code <<-EOH
-    source /etc/profile.d/rvm.sh
-    EOH
-  end
-
+  include_recipe "rvm::system"
 end
 
 # Git user
@@ -183,14 +146,17 @@ else
 
   bash "Install charlock_holmes gem" do
     code <<-EOH
+    source /etc/profile.d/rvm.sh
+    rvm use 1.9.3
     gem install charlock_holmes --version '0.6.9.4'
     EOH
   end
 
-  bash "Install bundler gem" do
-    code <<-EOH
-    gem install bundler chef
-    EOH
+  ruby_block "Debug" do
+    block do
+      puts %x(ruby --version)
+      puts %x(gem list)
+    end
   end
 
 end
@@ -231,7 +197,7 @@ execute "create_admin" do
   admin.projects_limit = 10000
   admin.admin = true
   admin.save!
-EOS
+  EOS
   command "bundle exec rails runner -e #{node['gitlab']['rails_env']} \"#{ruby_script}\""
   cwd node['gitlab']['path']
   action :nothing
