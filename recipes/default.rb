@@ -56,14 +56,6 @@ when "redhat", "centos", "fedora"
     package pkg
   end
 
-  # Remove old ruby versions!
-  bash "Remove old ruby versions" do
-    code <<-EOH
-    yum remove ruby -y
-    EOH
-    not_if "ruby --version | grep 1.9"
-  end
-
   # Install ruby manually via RVM
   directory "/tmp/ruby" do
     owner "root"
