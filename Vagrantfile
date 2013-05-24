@@ -18,14 +18,14 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
 
   # CentOS 6.4 Box
-  #config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130427.box"
-  #config.vm.box = "nrel-centos6"
+  #config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-6.4_chef-11.4.4.box"
+  #config.vm.box = "bento-centos6"
 
 
-  config.vm.provider "virtualbox" do |v|
-     v.customize ["modifyvm", :id, "--memory", 2048]
-  end
- 
+  #config.vm.provider "virtualbox" do |v|
+  #  v.customize ["modifyvm", :id, "--memory", 2048]
+  #end
+
   # Assign this VM to a host-only network IP, allowing you to access it
   # via the IP. Host-only networks can talk to the host machine as well as
   # any other machines on the same network, but cannot be accessed (through this
@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
 
   # Syncing my own code version
-  #config.vm.synced_folder LOCAL_GITLAB_DEV_PATH, "/gitlabhq"
+  config.vm.synced_folder LOCAL_GITLAB_DEV_PATH, "/gitlabhq"
 
   config.vm.provision :chef_solo do |chef|
     chef.json = {
@@ -65,8 +65,15 @@ Vagrant.configure("2") do |config|
       :gitlab => {
         :mysql_password => 'k09vw7wa5s',
         # If you want to test production installation, comment out the next two lines.
-        #:path => '/gitlabhq',
-        #:rails_env => 'development'
+        :path => '/gitlabhq',
+        :rails_env => 'development'
+      },
+      :rvm => {
+        :default_ruby => "1.9.3",
+        :global_gems => [
+          {:name => "bundler"},
+          {:name => "chef"}
+        ]
       }
     }
 
