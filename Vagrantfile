@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
 
   # Syncing my own code version
-  config.vm.synced_folder LOCAL_GITLAB_DEV_PATH, "/gitlabhq"
+  #config.vm.synced_folder LOCAL_GITLAB_DEV_PATH, "/gitlabhq"
 
   config.vm.provision :chef_solo do |chef|
     chef.json = {
@@ -64,8 +64,9 @@ Vagrant.configure("2") do |config|
       },
       :gitlab => {
         :mysql_password => 'k09vw7wa5s',
-        :path => '/gitlabhq',
-        :rails_env => 'development'
+        # If you want to test production installation, comment out the next two lines.
+        #:path => '/gitlabhq',
+        #:rails_env => 'development'
       }
     }
 
