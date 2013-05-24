@@ -6,6 +6,10 @@ Chef cookbook to setup gitlab v5.2 according to [these instructions](https://git
 
 To develop and test this cookbook, we recommend installing [Vagrant](http://www.vagrantup.com/) and [vagrant-berkshelf](https://github.com/RiotGames/vagrant-berkshelf).
 
+#### Platforms
+* Ubuntu 12.04
+* CentOS 6.4
+
 # Usage
 
 ## gitlab::default
