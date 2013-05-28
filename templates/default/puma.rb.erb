@@ -15,7 +15,7 @@ directory application_path
 #
 # The default is “development”.
 #
-environment = :production
+environment = "<%= node['gitlab']['rails_env'] %>"
 
 # Daemonize the server into the background. Highly suggest that
 # this be combined with “pidfile” and “stdout_redirect”.

@@ -75,7 +75,7 @@ mysql_connection_info = {:host => "localhost",
 mysql_database_user 'gitlab' do
   connection mysql_connection_info
   password node['gitlab']['mysql_password']
-  database_name 'gitlabhq_production'
+  database_name node['gitlab']['database_name']
   host 'localhost'
   privileges [:select, :update, :insert, :delete, :create, :drop, :index, :alter]
   action :create
@@ -83,18 +83,18 @@ end
 
 # Clone the Gitlab repository
 git "gitlab" do
-  repository    "https://github.com/gitlabhq/gitlabhq.git"
+  repository    node['gitlab']['repository']
   revision      node['gitlab']['revision']
   destination   node['gitlab']['path']
   user          node['gitlab']['user']
   action        :sync
-  notifies      :run, "execute[migrations]", :delayed
+  not_if        { node['gitlab']['rails_env'] == 'development' }
 end
 
 # Write config files for gitlab, puma and resque
 %w{gitlab.yml puma.rb database.yml resque.yml}.each do |conf_file|
   template File.join(node['gitlab']['path'], 'config', conf_file) do
-    user node['gitlab']['user']
+    owner node['gitlab']['user']
     source "#{conf_file}.erb"
   end
 end
@@ -118,7 +118,7 @@ end
 
 # Create directory for satellites
 directory node['gitlab']['satellites_path'] do
-  user node['gitlab']['user']
+  owner node['gitlab']['user']
 end
 
 # Configure Git global settings for git user, useful when editing via web
@@ -135,26 +135,26 @@ gem_package 'charlock_holmes' do
 end
 
 execute 'bundle install' do
-  command "bundle install --deployment --without development test postgres"
-  user node['gitlab']['user']
+  command(node['gitlab']['rails_env'] == 'development' ? "bundle install --without postgres" : "bundle install --deployment --without development test postgres")
   cwd node['gitlab']['path']
+end
+
+# Create the database and notify grant and seed
+mysql_database(node['gitlab']['database_name']) do
+  connection mysql_connection_info
+  encoding 'utf8'
+  collation 'utf8_unicode_ci'
+  action :create
+  notifies :grant, "mysql_database_user[gitlab]", :immediately
+  notifies :run, "execute[seed_database]", :immediately
 end
 
 # Seed the database
 execute "seed_database" do
-  command "bundle exec rake RAILS_ENV=production db:setup"
-  user node['gitlab']['user']
+  command "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:setup"
   cwd node['gitlab']['path']
   action :nothing
   notifies :run, "execute[create_admin]", :immediately
-end
-
-# Migrate the database on a git sync
-execute "migrations" do
-  command "bundle exec rake RAILS_ENV=production db:migrate"
-  user node['gitlab']['user']
-  cwd node['gitlab']['path']
-  action :nothing
 end
 
 # Manually add the first administrator
@@ -171,20 +171,15 @@ execute "create_admin" do
   admin.admin = true
   admin.save!
 EOS
-  command "bundle exec rails runner -e production \"#{ruby_script}\""
-  user node['gitlab']['user']
+  command "bundle exec rails runner -e #{node['gitlab']['rails_env']} \"#{ruby_script}\""
   cwd node['gitlab']['path']
   action :nothing
 end
 
-# Create the database and notify grant and seed
-mysql_database 'gitlabhq_production' do
-  connection mysql_connection_info
-  encoding 'utf8'
-  collation 'utf8_unicode_ci'
-  action :create
-  notifies :grant, "mysql_database_user[gitlab]", :immediately
-  notifies :run, "execute[seed_database]", :immediately
+# Migrate the database
+execute "migrations" do
+  command "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:migrate"
+  cwd node['gitlab']['path']
 end
 
 service "gitlab" do
@@ -202,7 +197,7 @@ end
 template "/etc/nginx/sites-available/gitlab" do
   source "nginx_gitlab.erb"
   mode 0644
-  notifies :restart, "service[nginx]"
+  notifies :reload, "service[nginx]"
 end
 
 nginx_site "gitlab"

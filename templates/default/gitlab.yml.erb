@@ -16,7 +16,7 @@ production: &base
   gitlab:
     ## Web server settings
     host: "<%= node['gitlab']['host'] %>"
-    port: <%= if node['gitlab']['ssl'] then '443' else '80' end %>
+    port: <%= if node['gitlab']['ssl'] then '443' else node['gitlab']['port'] end %>
     https: <%= if node['gitlab']['ssl'] then 'true' else 'false' end %>
     # Uncomment and customize to run in non-root path
     # Note that ENV['RAILS_RELATIVE_URL_ROOT'] in config/unicorn.rb may need to be changed

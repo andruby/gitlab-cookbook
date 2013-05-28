@@ -5,9 +5,13 @@ default['gitlab']['shell_path'] = "/home/git/gitlab-shell"
 default['gitlab']['repos_path'] = "/home/git/repositories"
 default['gitlab']['path'] = "/home/git/gitlab"
 default['gitlab']['satellites_path'] = "/home/git/gitlab-satellites"
+default['gitlab']['rails_env'] = 'production'
+# The codebase will only be synced from a git repo when rails_env == 'production'
+default['gitlab']['repository'] = "https://github.com/gitlabhq/gitlabhq.git"
 default['gitlab']['revision'] = 'v5.2.0'
 default['gitlab']['shell_revision'] = 'v1.4.0'
 default['gitlab']['port'] = '80'
+default['gitlab']['database_name'] = 'gitlabhq'
 
 # Url to gitlab instance. Used for api calls
 default['gitlab']['url'] = "http://localhost/"
