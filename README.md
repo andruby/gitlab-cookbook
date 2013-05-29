@@ -75,7 +75,7 @@ Vagrant.configure("2") do |config|
         :mysql_password => 'k09vw7wa5s',
         :path => '/vagrant',
         :rails_env => 'development',
-        :sync_repository => 'false',
+        :sync_repository => false,
         :bundle_install_cmd => 'bundle install --without postgres'
       }
     }
