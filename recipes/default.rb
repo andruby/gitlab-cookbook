@@ -147,18 +147,10 @@ else
   bash "Install charlock_holmes gem" do
     code <<-EOH
     source /etc/profile.d/rvm.sh
-    rvm use 1.9.3
+    rvm use #{node['rvm']['default_ruby']}
     gem install charlock_holmes --version '0.6.9.4'
     EOH
   end
-
-  ruby_block "Debug" do
-    block do
-      puts %x(ruby --version)
-      puts %x(gem list)
-    end
-  end
-
 end
 
 execute 'bundle install' do
@@ -227,19 +219,12 @@ template "/etc/nginx/sites-available/gitlab" do
   notifies :reload, "service[nginx]"
 end
 
+# I would love to use the directory resource for this. Unfortunately, this bug exists:
+# http://tickets.opscode.com/browse/CHEF-1621
 bash "Fix permisions" do
   code <<-EOH
-  chmod -R 755 /home/git
+  chmod -R 755 #{node['gitlab']['home']}
   EOH
 end
 
 nginx_site "gitlab"
-
-case node["platform"]
-when "centos"
-  bash "Open port 80 in firewall" do
-    code <<-EOH
-    iptables -I INPUT 1 -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
-    EOH
-  end
-end

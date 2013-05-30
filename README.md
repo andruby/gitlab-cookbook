@@ -37,6 +37,18 @@ Add `gitlab::default` to your node's run_list and make sure to set these attribu
 }
 ```
 
+When running on CentOS, you also have to provide the following RVM configuration:
+
+```json
+"rvm" : {
+  "default_ruby" : "1.9.3",
+  "global_gems" : [
+    {"name" : "bundler"},
+    {"name" : "chef"}
+  ]
+}
+```
+
 ## gitlab::fanout
 
 Optional recipe that installs [fanout](https://github.com/travisghansen/fanout) and enables it as an Upstart service.
