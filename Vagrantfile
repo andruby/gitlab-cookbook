@@ -1,9 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Set this to the path of your host machine's gitlab code
-LOCAL_GITLAB_DEV_PATH = (ENV['LOCAL_GITLAB_DEV_PATH'] || "~/code/gitlabhq")
-
+# This Vagrant file helps the development of the cookbook.
+# It installs and configures the official v5.2.0 version from https://github.com/gitlabhq/gitlabhq,
+# runs it in production mode and serves it through an nginx proxy on localhost:8080.
 
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -30,9 +30,6 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
-  # Syncing my own code version
-  config.vm.synced_folder LOCAL_GITLAB_DEV_PATH, "/gitlabhq"
-
   config.vm.provision :chef_solo do |chef|
     chef.json = {
       :mysql => {
@@ -42,9 +39,7 @@ Vagrant.configure("2") do |config|
         :bind_address => 'localhost'
       },
       :gitlab => {
-        :mysql_password => 'k09vw7wa5s',
-        :path => '/gitlabhq',
-        :rails_env => 'development'
+        :mysql_password => 'k09vw7wa5s'
       }
     }
 

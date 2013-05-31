@@ -13,23 +13,26 @@ To develop and test this cookbook, we recommend installing [Vagrant](http://www.
 Default recipe. Installs Gitlab with all its dependencies. Configures it as a service that is started at boot time.
 
 Add `gitlab::default` to your node's run_list and make sure to set these attributes:
+
 ```json
-"mysql": {
-  "server_repl_password": "XXX",
-  "server_debian_password": "XXX",
-  "server_root_password": "XXX"
-},
-"gitlab": {
-  "root": {
-    "name": "Administrator",
-    "email": "admin@example.com",
-    "username": "root",
-    "password": "5iveL!fe"
+{
+  "mysql": {
+    "server_repl_password": "XXX",
+    "server_debian_password": "XXX",
+    "server_root_password": "XXX"
   },
-  "url": "http://example.com",
-  "host": "example.com",
-  "email_from": "gitlab@example.com",
-  "support_email": "support@example.com"
+  "gitlab": {
+    "root": {
+      "name": "Administrator",
+      "email": "admin@example.com",
+      "username": "root",
+      "password": "5iveL!fe"
+    },
+    "url": "http://example.com",
+    "host": "example.com",
+    "email_from": "gitlab@example.com",
+    "support_email": "support@example.com"
+  }
 }
 ```
 
@@ -37,12 +40,58 @@ Add `gitlab::default` to your node's run_list and make sure to set these attribu
 
 Optional recipe that installs [fanout](https://github.com/travisghansen/fanout) and enables it as an Upstart service.
 
-## With Vagrant (development mode)
+## With Vagrant from an other repository
 
-By default vagrant will sync your LOCAL_GITLAB_DEV_PATH to /gitlabhq and run GitLab in development mode.
-Set the environment variable to your local vagrant folder when running vagrant up.
+When I work on the GitlabHQ code I use this Vagrantfile (inside the GitlabHQ code directory):
 
-`LOCAL_GITLAB_DEV_PATH=~/code/gitlabhq  vagrant up`, `vagrant ssh` and start foreman with `cd /gitlabhq && sudo foreman start`.
+```ruby
+Vagrant.configure("2") do |config|
+  # All Vagrant configuration is done here. The most common configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
+  config.berkshelf.enabled = true
+
+  config.vm.hostname = "gitlab-dev"
+
+  # Standard Ubuntu 12.04.2 base box
+  config.vm.box = "ubuntu-12.04.2-amd64"
+  config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  config.vm.network :forwarded_port, guest: 3306, host: 3307  # MySQL
+  config.vm.network :forwarded_port, guest: 3000, host: 3001  # Development Puma
+
+  config.vm.provision :chef_solo do |chef|
+    chef.json = {
+      :mysql => {
+        :server_root_password => 'rootpass',
+        :server_debian_password => 'debpass',
+        :server_repl_password => 'replpass',
+        :bind_address => 'localhost'
+      },
+      :gitlab => {
+        :mysql_password => 'k09vw7wa5s',
+        :path => '/vagrant',
+        :rails_env => 'development',
+        :sync_repository => false,
+        :bundle_install_cmd => 'bundle install --without postgres'
+      }
+    }
+
+    chef.add_recipe "gitlab::default"
+  end
+end
+```
+
+Note the `path`, `sync_repository`, `rails_env` and `bundle_install_cmd` used to set gitlab in development mode.
+
+With this Berksfile
+
+```
+cookbook 'gitlab', :git => 'https://github.com/andruby/gitlab-cookbook.git'
+```
 
 # Attributes
 

@@ -89,7 +89,7 @@ git "gitlab" do
   user          node['gitlab']['user']
   group         node['gitlab']['group']
   action        :sync
-  not_if        { node['gitlab']['rails_env'] == 'development' }
+  only_if       { node['gitlab']['sync_repository'] }
 end
 
 # Write config files for gitlab, puma and resque
@@ -138,7 +138,7 @@ gem_package 'charlock_holmes' do
 end
 
 execute 'bundle install' do
-  command(node['gitlab']['rails_env'] == 'development' ? "bundle install --without postgres" : "bundle install --deployment --without development test postgres")
+  command node['gitlab']['bundle_install_cmd']
   cwd node['gitlab']['path']
   user node['gitlab']['user']
 end
