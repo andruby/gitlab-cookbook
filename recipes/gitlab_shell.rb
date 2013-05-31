@@ -4,14 +4,16 @@ git "gitlab shell" do
   revision    node['gitlab']['shell_revision']
   destination node['gitlab']['shell_path']
   user        node['gitlab']['user']
+  group       node['gitlab']['group']
   action      :sync
-  notifies    :run, "execute[gitlab install]"
 end
 
 template "gitlab-shell/config.yml" do
   path        File.join(node['gitlab']['shell_path'], 'config.yml')
   user        node['gitlab']['user']
+  group       node['gitlab']['group']
   source      "gitlab_shell_config.yml.erb"
+  notifies    :run, "execute[gitlab install]", :immediately
 end
 
 execute "gitlab install" do
