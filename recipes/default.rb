@@ -87,6 +87,7 @@ git "gitlab" do
   revision      node['gitlab']['revision']
   destination   node['gitlab']['path']
   user          node['gitlab']['user']
+  group         node['gitlab']['group']
   action        :sync
   not_if        { node['gitlab']['rails_env'] == 'development' }
 end
@@ -95,6 +96,7 @@ end
 %w{gitlab.yml puma.rb database.yml resque.yml}.each do |conf_file|
   template File.join(node['gitlab']['path'], 'config', conf_file) do
     owner node['gitlab']['user']
+    group node['gitlab']['group']
     source "#{conf_file}.erb"
   end
 end
@@ -109,16 +111,17 @@ end
 end
 
 # Set ownership of repositories path
-directory(node['gitlab']['repos_path']) do
+directory node['gitlab']['repos_path'] do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   recursive true
-  mode 2755
+  mode 02770
 end
 
 # Create directory for satellites
 directory node['gitlab']['satellites_path'] do
   owner node['gitlab']['user']
+  group node['gitlab']['group']
 end
 
 # Configure Git global settings for git user, useful when editing via web
@@ -137,6 +140,7 @@ end
 execute 'bundle install' do
   command(node['gitlab']['rails_env'] == 'development' ? "bundle install --without postgres" : "bundle install --deployment --without development test postgres")
   cwd node['gitlab']['path']
+  user node['gitlab']['user']
 end
 
 # Create the database and notify grant and seed
@@ -153,6 +157,7 @@ end
 execute "seed_database" do
   command "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:setup"
   cwd node['gitlab']['path']
+  user node['gitlab']['user']
   action :nothing
   notifies :run, "execute[create_admin]", :immediately
 end
@@ -173,6 +178,7 @@ execute "create_admin" do
 EOS
   command "bundle exec rails runner -e #{node['gitlab']['rails_env']} \"#{ruby_script}\""
   cwd node['gitlab']['path']
+  user node['gitlab']['user']
   action :nothing
 end
 

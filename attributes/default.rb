@@ -10,7 +10,8 @@ default['gitlab']['rails_env'] = 'production'
 default['gitlab']['repository'] = "https://github.com/gitlabhq/gitlabhq.git"
 default['gitlab']['revision'] = 'v5.2.0'
 default['gitlab']['shell_revision'] = 'v1.4.0'
-default['gitlab']['port'] = '80'
+default['gitlab']['http_port'] = '80'
+default['gitlab']['https_port'] = '443'
 default['gitlab']['database_name'] = 'gitlabhq'
 
 # Url to gitlab instance. Used for api calls
