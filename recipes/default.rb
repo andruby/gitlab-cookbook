@@ -42,15 +42,22 @@ end
 
 # Include cookbook dependencies
 %w{ git build-essential readline xml zlib python::package python::pip
-    redisio::install redisio::enable mysql::server mysql::ruby nginx }.each do |requirement|
+redisio::install redisio::enable mysql::server mysql::ruby nginx }.each do |requirement|
   include_recipe requirement
 end
 
-%w{ ruby1.9.1 ruby1.9.1-dev curl libicu-dev }.each do |pkg|
-  package pkg
-end
+case node["platform"]
+when "debian", "ubuntu"
+  %w{ ruby1.9.1 ruby1.9.1-dev curl libicu-dev }.each do |pkg|
+    package pkg
+  end
+when "redhat", "centos", "fedora"
+  %w{libicu-devel patch gcc-c++ readline-devel zlib-devel libffi-devel openssl-devel make autoconf automake libtool bison libxml2-devel libxslt-devel libyaml-devel}.each do |pkg|
+    package pkg
+  end
 
-gem_package "bundler"
+  include_recipe "rvm::system"
+end
 
 # Git user
 user node['gitlab']['user'] do
@@ -132,9 +139,21 @@ bash "git config" do
   environment('HOME' => node['gitlab']['home'])
 end
 
-# Install gems
-gem_package 'charlock_holmes' do
-  version '0.6.9.4'
+if platform?("ubuntu")
+  # Install gems
+  gem_package "bundler"
+  gem_package 'charlock_holmes' do
+    version '0.6.9.4'
+  end
+else
+
+  bash "Install charlock_holmes gem" do
+    code <<-EOH
+    source /etc/profile.d/rvm.sh
+    rvm use #{node['rvm']['default_ruby']}
+    gem install charlock_holmes --version '0.6.9.4'
+    EOH
+  end
 end
 
 execute 'bundle install' do
@@ -165,7 +184,7 @@ end
 # Manually add the first administrator
 # script contents from https://github.com/gitlabhq/gitlabhq/blob/master/db/fixtures/production/001_admin.rb
 execute "create_admin" do
-  ruby_script = <<EOS
+  ruby_script = <<-EOS
   admin = User.create!(
     email: '#{node['gitlab']['root']['email']}',
     name: '#{node['gitlab']['root']['name']}',
@@ -175,7 +194,7 @@ execute "create_admin" do
   admin.projects_limit = 10000
   admin.admin = true
   admin.save!
-EOS
+  EOS
   command "bundle exec rails runner -e #{node['gitlab']['rails_env']} \"#{ruby_script}\""
   cwd node['gitlab']['path']
   user node['gitlab']['user']
@@ -207,3 +226,9 @@ template "/etc/nginx/sites-available/gitlab" do
 end
 
 nginx_site "gitlab"
+
+# I would love to use the directory resource for this. Unfortunately, this bug exists:
+# http://tickets.opscode.com/browse/CHEF-1621
+bash "Fix permisions" do
+  code "chmod -R 755 #{node['gitlab']['home']}"
+end

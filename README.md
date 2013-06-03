@@ -6,6 +6,10 @@ Chef cookbook to setup gitlab v5.2 according to [these instructions](https://git
 
 To develop and test this cookbook, we recommend installing [Vagrant](http://www.vagrantup.com/) and [vagrant-berkshelf](https://github.com/RiotGames/vagrant-berkshelf).
 
+#### Platforms
+* Ubuntu 12.04
+* CentOS 6.4
+
 # Usage
 
 ## gitlab::default
@@ -33,6 +37,18 @@ Add `gitlab::default` to your node's run_list and make sure to set these attribu
     "email_from": "gitlab@example.com",
     "support_email": "support@example.com"
   }
+}
+```
+
+When running on CentOS, you also have to provide the following RVM configuration:
+
+```json
+"rvm" : {
+  "default_ruby" : "1.9.3",
+  "global_gems" : [
+    {"name" : "bundler"},
+    {"name" : "chef"}
+  ]
 }
 ```
 

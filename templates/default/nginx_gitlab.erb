@@ -8,14 +8,22 @@ upstream gitlab {
 
 <%- if node['gitlab']['ssl'] %>
 server {
+<% if node.platform?("centos","redhat","fedora") %>
+  listen 0.0.0.0:<%= node['gitlab']['http_port'] %>;
+<% else %>
   listen [::]:<%= node['gitlab']['http_port'] %>;
+<% end %>
   server_name <%= node['gitlab']['host'] %>;
   rewrite ^ https://$server_name:<%= node['gitlab']['https_port'] %>$request_uri? permanent;
 }
 <%- end %>
 
 server {
+<% if node.platform?("centos","redhat","fedora") %>
+  listen 0.0.0.0:<%= if node['gitlab']['ssl'] then node['gitlab']['https_port'] else node['gitlab']['http_port'] end %>;
+<% else %>
   listen [::]:<%= if node['gitlab']['ssl'] then node['gitlab']['https_port'] else node['gitlab']['http_port'] end %>;
+<% end %>
   server_name <%= node['gitlab']['host'] %>;
   root <%= File.join(node['gitlab']['path'], 'public')%>;
 

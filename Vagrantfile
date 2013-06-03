@@ -17,6 +17,10 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu-12.04.2-amd64"
   config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
 
+  # CentOS 6.4 Box
+  #config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-6.4_chef-11.4.4.box"
+  #config.vm.box = "bento-centos6"
+
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
@@ -40,6 +44,14 @@ Vagrant.configure("2") do |config|
       },
       :gitlab => {
         :mysql_password => 'k09vw7wa5s'
+      },
+      # rvm config needed for CentOS
+      :rvm => {
+        :default_ruby => "1.9.3",
+        :global_gems => [
+          {:name => "bundler"},
+          {:name => "chef"}
+        ]
       }
     }
 

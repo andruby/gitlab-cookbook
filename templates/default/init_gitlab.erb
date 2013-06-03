@@ -14,6 +14,13 @@
 # Description:       GitLab git repository management
 ### END INIT INFO
 
+<% if node.platform?("centos","redhat","fedora") -%>
+# Include RedHat function library
+. /etc/rc.d/init.d/functions
+# Source RVM as the yum-installable ruby is too old
+source /etc/profile.d/rvm.sh
+rvm use 1.9.3
+<% end -%>
 
 APP_ROOT="<%= node['gitlab']['path'] %>"
 APP_USER="<%= node['gitlab']['user'] %>"
