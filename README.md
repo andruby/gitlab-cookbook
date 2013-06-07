@@ -113,17 +113,17 @@ cookbook 'gitlab', :git => 'https://github.com/andruby/gitlab-cookbook.git'
 
 It is recommended that you change the following attributes:
 
-* `node['gitlab']['root']['name']` – Name of the root user. (default: 'Administrator')
-* `node['gitlab']['root']['email']` – Email of the root user. (default: 'admin@local.host')
-* `node['gitlab']['root']['username']` – Username of the root user. (default: 'root')
-* `node['gitlab']['root']['password']` – Password of the root user. (default: '5iveL!fe')
+* `node['gitlab']['root']['name']` - Name of the root user. (default: 'Administrator')
+* `node['gitlab']['root']['email']` - Email of the root user. (default: 'admin@local.host')
+* `node['gitlab']['root']['username']` - Username of the root user. (default: 'root')
+* `node['gitlab']['root']['password']` - Password of the root user. (default: '5iveL!fe')
 
 Set these attributes to match your server configuration:
 
-* `node['gitlab']['url']` – Url to the gitlab instance. Used for api calls (default: 'http://localhost/')
-* `node['gitlab']['host']` – Host name in gitlab.yml (default: 'localhost')
-* `node['gitlab']['email_from']` – Email address used in the "From" field in mails sent by GitLab (default: 'gitlab@localhost')
-* `node['gitlab']['support_email']` – Email address of your support contact (default: 'support@localhost')
+* `node['gitlab']['url']` - Url to the gitlab instance. Used for api calls (default: 'http://localhost/')
+* `node['gitlab']['host']` - Host name in gitlab.yml (default: 'localhost')
+* `node['gitlab']['email_from']` - Email address used in the "From" field in mails sent by GitLab (default: 'gitlab@localhost')
+* `node['gitlab']['support_email']` - Email address of your support contact (default: 'support@localhost')
 
 See the `attributes/default.rb` file for the full list of attributes.
 
