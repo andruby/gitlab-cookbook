@@ -127,6 +127,8 @@ Set these attributes to match your server configuration:
 
 See the `attributes/default.rb` file for the full list of attributes.
 
-# Author
+# Authors
 
-Author:: Andrew Fecheyr (<andrew@bedesign.be>)
+* [Andrew Fecheyr](https://github.com/andruby) (<andrew@bedesign.be>)
+* [Aimo Thiele](https://github.com/athiele) (<aimo.thiele@coremedia.com>)
+* [tnarik](https://github.com/tnarik)
