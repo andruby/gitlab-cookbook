@@ -86,8 +86,8 @@ include_recipe "gitlab::gitlab_shell"
 
 # Database
 mysql_connection_info = {:host => "localhost",
-                         :username => 'root',
-                         :password => node['mysql']['server_root_password']}
+  :username => 'root',
+:password => node['mysql']['server_root_password']}
 
 mysql_database_user 'gitlab' do
   connection mysql_connection_info
@@ -227,6 +227,13 @@ template "/etc/init.d/gitlab" do
   mode 0744
   notifies :enable, "service[gitlab]"
   notifies :start, "service[gitlab]"
+end
+
+if platform("amazon")
+  # Remove default site that conflicts
+  file "/etc/nginx/sites-enabled/000-default" do
+    action :delete
+  end
 end
 
 template "/etc/nginx/sites-available/gitlab" do
