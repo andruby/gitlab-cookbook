@@ -52,10 +52,6 @@ When running on CentOS, you also have to provide the following RVM configuration
 }
 ```
 
-## gitlab::fanout
-
-Optional recipe that installs [fanout](https://github.com/travisghansen/fanout) and enables it as an Upstart service.
-
 ## With Vagrant from an other repository
 
 When I work on the GitlabHQ code I use this Vagrantfile (inside the GitlabHQ code directory):

@@ -36,12 +36,3 @@ default['gitlab']['root']['password'] = '5iveL!fe'
 default['gitlab']['ssl'] = false
 default['gitlab']['ssl_crt_path'] = ''
 default['gitlab']['ssl_key_path'] = ''
-
-# Fanout
-default['fanout']['dir'] = '/opt/fanout'
-default['fanout']['bin'] = '/usr/local/bin/fanout'
-default['fanout']['port'] = '1986'
-default['fanout']['run-as'] = nil
-default['fanout']['client-limit'] = nil
-default['fanout']['logfile'] = '/var/log/fanout'
-default['fanout']['max-logfile-size'] = 10

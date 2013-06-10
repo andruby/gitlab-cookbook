@@ -56,7 +56,5 @@ Vagrant.configure("2") do |config|
     }
 
     chef.add_recipe "gitlab::default"
-    # TODO: Extract fanout to separate cookbook
-    chef.add_recipe "gitlab::fanout"
   end
 end
