@@ -229,7 +229,7 @@ template "/etc/init.d/gitlab" do
   notifies :start, "service[gitlab]"
 end
 
-if platform("amazon")
+if platform?("amazon")
   # Remove default site that conflicts
   file "/etc/nginx/sites-enabled/000-default" do
     action :delete
