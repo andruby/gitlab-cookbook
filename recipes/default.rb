@@ -41,6 +41,16 @@ when "redhat", "centos", "fedora", "amazon"
 end
 
 # Include cookbook dependencies
+
+if platform?("amazon")
+  # For ruby gem installation and rvm ruby build
+  bash "Install development tools to install ruby gems" do
+    code <<-EOH
+    yum -y groupinstall 'Development Tools'
+    EOH
+  end
+end
+
 %w{ git build-essential readline xml zlib python::package python::pip
 redisio::install redisio::enable mysql::server mysql::ruby nginx }.each do |requirement|
   include_recipe requirement
