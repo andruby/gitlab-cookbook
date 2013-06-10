@@ -36,7 +36,7 @@ end
 case node["platform"]
 when "debian", "ubuntu"
   include_recipe "apt::default"
-when "redhat", "centos", "fedora"
+when "redhat", "centos", "fedora", "amazon"
   include_recipe "yum::epel"
 end
 
@@ -51,7 +51,7 @@ when "debian", "ubuntu"
   %w{ ruby1.9.1 ruby1.9.1-dev curl libicu-dev }.each do |pkg|
     package pkg
   end
-when "redhat", "centos", "fedora"
+when "redhat", "centos", "fedora", "amazon"
   %w{libicu-devel patch gcc-c++ readline-devel zlib-devel libffi-devel openssl-devel make autoconf automake libtool bison libxml2-devel libxslt-devel libyaml-devel}.each do |pkg|
     package pkg
   end
