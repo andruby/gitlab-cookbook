@@ -21,7 +21,11 @@ default['gitlab']['bundle_install_cmd'] = "bundle install --deployment --without
 default['gitlab']['url'] = "http://localhost/"
 
 ## Gitlab.yml config
+if platform?("amazon")
+default['gitlab']['host'] = '$HOSTNAME'
+else
 default['gitlab']['host'] = 'localhost'
+end
 default['gitlab']['email_from'] = 'gitlab@localhost'
 default['gitlab']['support_email'] = 'support@localhost'
 default['gitlab']['socket'] = '/tmp/gitlab.socket'
