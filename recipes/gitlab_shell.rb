@@ -17,7 +17,11 @@ template "gitlab-shell/config.yml" do
 end
 
 execute "gitlab install" do
-  command     "./bin/install"
+  if platform?("amazon")
+    command "source /etc/profile.d/rvm.sh && rvm use 1.9.3 && ./bin/install"
+  else
+    command  "./bin/install"
+  end
   cwd         node['gitlab']['shell_path']
   user        node['gitlab']['user']
   action      :nothing

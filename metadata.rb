@@ -12,3 +12,4 @@ end
 
 supports "ubuntu"
 supports "centos"
+supports "amazon"

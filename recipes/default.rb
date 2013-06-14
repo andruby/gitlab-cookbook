@@ -36,11 +36,21 @@ end
 case node["platform"]
 when "debian", "ubuntu"
   include_recipe "apt::default"
-when "redhat", "centos", "fedora"
+when "redhat", "centos", "fedora", "amazon"
   include_recipe "yum::epel"
 end
 
 # Include cookbook dependencies
+
+if platform?("amazon")
+  # For ruby gem installation and rvm ruby build
+  bash "Install development tools to install ruby gems" do
+    code <<-EOH
+    yum -y groupinstall 'Development Tools'
+    EOH
+  end
+end
+
 %w{ git build-essential readline xml zlib python::package python::pip
 redisio::install redisio::enable mysql::server mysql::ruby nginx }.each do |requirement|
   include_recipe requirement
@@ -51,7 +61,7 @@ when "debian", "ubuntu"
   %w{ ruby1.9.1 ruby1.9.1-dev curl libicu-dev }.each do |pkg|
     package pkg
   end
-when "redhat", "centos", "fedora"
+when "redhat", "centos", "fedora", "amazon"
   %w{libicu-devel patch gcc-c++ readline-devel zlib-devel libffi-devel openssl-devel make autoconf automake libtool bison libxml2-devel libxslt-devel libyaml-devel}.each do |pkg|
     package pkg
   end
@@ -76,8 +86,8 @@ include_recipe "gitlab::gitlab_shell"
 
 # Database
 mysql_connection_info = {:host => "localhost",
-                         :username => 'root',
-                         :password => node['mysql']['server_root_password']}
+  :username => 'root',
+:password => node['mysql']['server_root_password']}
 
 mysql_database_user 'gitlab' do
   connection mysql_connection_info
@@ -217,6 +227,13 @@ template "/etc/init.d/gitlab" do
   mode 0744
   notifies :enable, "service[gitlab]"
   notifies :start, "service[gitlab]"
+end
+
+if platform?("amazon")
+  # Remove default site that conflicts
+  file "/etc/nginx/sites-enabled/000-default" do
+    action :delete
+  end
 end
 
 template "/etc/nginx/sites-available/gitlab" do
