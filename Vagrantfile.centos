@@ -13,9 +13,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.hostname = "gitlab"
 
-  # Standard Ubuntu 12.04.2 base box
-  config.vm.box = "ubuntu-12.04.2-amd64"
-  config.vm.box_url = "https://dl.dropbox.com/u/2894322/ubuntu-12.04.2-amd64.box"
+  # CentOS 6.4 Box
+  config.vm.box_url = "https://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-6.4_chef-11.4.4.box"
+  config.vm.box = "bento-centos6"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
       }
     }
 
-    chef.add_recipe "gitlab::ruby_package"
+    chef.add_recipe "gitlab::ruby_rvm"
     chef.add_recipe "gitlab::default"
     chef.add_recipe "gitlab::nginx"
   end

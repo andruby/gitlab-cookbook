@@ -2,4 +2,5 @@ site :opscode
 
 metadata
 
-cookbook "rvm", git: "git@github.com:fnichol/chef-rvm.git"
+cookbook "rvm", github: "fnichol/chef-rvm"
+cookbook "ruby_build", github: "fnichol/chef-ruby_build"
