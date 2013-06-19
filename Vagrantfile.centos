@@ -43,6 +43,7 @@ Vagrant.configure("2") do |config|
       }
     }
 
+    chef.add_recipe "rvm::vagrant" # Resolves "rvm: command not found" and "Could not find chef"
     chef.add_recipe "gitlab::ruby_rvm"
     chef.add_recipe "gitlab::default"
     chef.add_recipe "gitlab::nginx"

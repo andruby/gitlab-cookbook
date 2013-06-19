@@ -17,7 +17,9 @@
 <% if node.platform?("centos","redhat","fedora","amazon") -%>
 # Include RedHat function library
 . /etc/rc.d/init.d/functions
-# Source RVM as the yum-installable ruby is too old
+<% end -%>
+<% if node['gitlab']['rvm_ruby'] -%>
+# Source RVM
 source /etc/profile.d/rvm.sh
 rvm use 1.9.3
 <% end -%>
