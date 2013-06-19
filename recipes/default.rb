@@ -2,6 +2,8 @@
 # Cookbook Name:: gitlab
 # Recipe:: default
 #
+# Configures a production ready stack for GitLab
+#
 # Copyright (C) 2013 Andrew Fecheyr
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -99,8 +101,9 @@ bash "git config" do
   environment('HOME' => node['gitlab']['home'])
 end
 
+# Install ruby gem dependencies
 bash 'bundle install' do
-  command "bundle install --deployment --without development test postgres"
+  code "bundle install --deployment --without development test postgres"
   cwd node['gitlab']['path']
   user node['gitlab']['user']
 end
@@ -133,7 +136,7 @@ end
 
 # Seed the database
 bash "seed_database" do
-  command "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:setup"
+  code "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:setup"
   cwd node['gitlab']['path']
   user node['gitlab']['user']
   action :nothing
@@ -154,7 +157,7 @@ bash "create_admin" do
   admin.admin = true
   admin.save!
   EOS
-  command "bundle exec rails runner -e #{node['gitlab']['rails_env']} \"#{ruby_script}\""
+  code "bundle exec rails runner -e #{node['gitlab']['rails_env']} \"#{ruby_script}\""
   cwd node['gitlab']['path']
   user node['gitlab']['user']
   action :nothing
@@ -162,7 +165,7 @@ end
 
 # Migrate the database
 bash "migrations" do
-  command "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:migrate"
+  code "bundle exec rake RAILS_ENV=#{node['gitlab']['rails_env']} db:migrate"
   cwd node['gitlab']['path']
 end
 
