@@ -11,8 +11,11 @@ end
 template "/etc/nginx/sites-available/gitlab" do
   source "nginx_gitlab.erb"
   mode 0644
-  notifies :reload, "service[nginx]"
 end
 
 # Enable gitlab site
 nginx_site "gitlab"
+
+service "nginx" do
+  action :restart
+end
