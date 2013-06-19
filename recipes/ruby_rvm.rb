@@ -8,4 +8,3 @@ rvm_default_ruby "1.9.3" do
 end
 
 rvm_gem "bundler"
-

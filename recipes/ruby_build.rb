@@ -1,11 +1,31 @@
 # Optional recipe to build a system wide ruby
 # with https://github.com/fnichol/chef-ruby_build
 
-# Compile ruby 1.9.3 from source
+# Prevent ruby_build recipe from compiling git from source
+include_recipe "git"
+
 include_recipe "ruby_build"
+
+# Users part of the ruby group will be able to install gems
+group "ruby"
+
+group "ruby" do
+  append true
+  members node['gitlab']['user']
+  action :modify
+  # action :nothing
+  # subscribes :modify, "user[#{node['gitlab']['user']}]", :immediate
+end
+
+# Compile ruby 1.9.3 from source
 ruby_build_ruby "1.9.3-p429" do
-  prefix_path "/usr/local/"
   group "ruby"
+  prefix_path "/usr/local/"
+end
+
+# Give users in the ruby group access to install/delete gems
+bash "Set group write permission on ruby gem path" do
+  code "chmod -R g+wt /usr/local/lib/ruby/gems"
 end
 
 # Install bundler with the correct ruby 1.9.3 gem binary
