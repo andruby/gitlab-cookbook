@@ -12,13 +12,12 @@ group "ruby"
 group "ruby" do
   append true
   members node['gitlab']['user']
-  action :modify
-  # action :nothing
-  # subscribes :modify, "user[#{node['gitlab']['user']}]", :immediate
+  action :nothing
+  subscribes :modify, "user[#{node['gitlab']['user']}]", :immediate
 end
 
-# Compile ruby 1.9.3 from source
-ruby_build_ruby "1.9.3-p429" do
+# Compile ruby from source
+ruby_build_ruby(node['ruby_build']['version']) do
   group "ruby"
   prefix_path "/usr/local/"
 end

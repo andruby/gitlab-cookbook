@@ -25,8 +25,11 @@
 case node["platform"]
 when "debian", "ubuntu"
   include_recipe "gitlab::debian"
-when "redhat", "centos", "fedora", "amazon"
+when "redhat", "centos", "fedora"
   include_recipe "gitlab::redhat"
+when "amazon"
+  include_recipe "gitlab::redhat"
+  include_recipe "gitlab::amazon_linux"
 end
 
 # Include cookbook dependencies

@@ -1,6 +1,6 @@
 # Clone Gitlab Shell
 git "gitlab shell" do
-  repository  "https://github.com/gitlabhq/gitlab-shell.git"
+  repository  node['gitlab']['shell_repository']
   revision    node['gitlab']['shell_revision']
   destination node['gitlab']['shell_path']
   user        node['gitlab']['user']
