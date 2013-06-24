@@ -1,6 +1,6 @@
 # Optional recipe to install a system wide ruby
 # from the OS package manager
 
-package "ruby1.9.1-dev"
+package(node['ruby_package']['version'])
 
 gem_package "bundler"
