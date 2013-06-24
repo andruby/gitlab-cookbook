@@ -174,20 +174,15 @@ end
 
 # Tell chef what the gitlab service supports
 service "gitlab" do
-  supports :restart => true, :start => true, :stop => true, :status => true
-  action :nothing
+  action [:enable, :start]
 end
 
 # Write the init file and enable the service
 template "/etc/init.d/gitlab" do
   source "init_gitlab.erb"
   mode 0744
-  notifies :enable, "service[gitlab]"
-  notifies :start, "service[gitlab]"
+  notifies :restart, "service[gitlab]"
 end
-
-# Install nginx as a reverse proxy
-include_recipe "gitlab::nginx"
 
 # I would love to use the directory resource for this. Unfortunately, this bug exists:
 # http://tickets.opscode.com/browse/CHEF-1621
