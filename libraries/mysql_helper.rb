@@ -13,11 +13,11 @@ module MysqlHelper
     end
   end
 
+  # Make sure mysql has a user with +username+ with all privileges on localhost.
   def self.create_superuser(credentials, username, password)
     require 'mysql'
     conn = ::Mysql.connect(credentials[:host], credentials[:username], credentials[:password])
-    r = conn.query("GRANT ALL ON *.* TO '#{username}'@'localhost' IDENTIFIED BY '#{password}'")
-    Chef::Log.warn "Result: #{r.inspect}"
+    conn.query("GRANT ALL ON *.* TO '#{username}'@'localhost' IDENTIFIED BY '#{password}'")
   ensure
     conn.close if conn
   end
