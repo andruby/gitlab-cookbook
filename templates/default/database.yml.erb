@@ -8,3 +8,16 @@
   password: <%= node['gitlab']['mysql_password'] %>
   socket: <%= node['mysql']['socket'] %>
   # host: localhost
+
+<%- if node['gitlab']['enable_test_db'] %>
+test:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  database: gitlab_test
+  pool: 5
+  username: gitlab
+  password: <%= node['gitlab']['mysql_password'] %>
+  socket: <%= node['mysql']['socket'] %>
+  # host: localhost
+<% end -%>
