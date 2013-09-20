@@ -172,16 +172,16 @@ bash "migrations" do
   cwd node['gitlab']['path']
 end
 
-# Tell chef what the gitlab service supports
-service "gitlab" do
-  action [:enable, :start]
-end
-
 # Write the init file and enable the service
 template "/etc/init.d/gitlab" do
   source "init_gitlab.erb"
   mode 0744
-  notifies :restart, "service[gitlab]"
+  #notifies :restart, "service[gitlab]"
+end
+
+# Tell chef what the gitlab service supports
+service "gitlab" do
+  action [:enable, :start]
 end
 
 # I would love to use the directory resource for this. Unfortunately, this bug exists:
